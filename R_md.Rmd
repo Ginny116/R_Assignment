@@ -1,0 +1,185 @@
+---
+title: "R_assignment_Mar 2021"
+author: "Giang Nguyen"
+date: "3/19/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+#Data Inspection
+str(genotypes) # displays the internal structure of a given R object
+nrow(genotypes) # return the number of rows 
+ncol(genotypes) # return the numberof columns
+dim(genotypes) # Dimensions of an Object
+str(position)
+nrow(position)
+ncol(position)
+dim(position)
+
+# Manipulate data
+maize_genotypes <- filter(genotypes, Group == "ZMMLR" | Group == "ZMMIL" | Group == "ZMMMR") 
+teosinte_genotypes <- filter(genotypes, Group == "ZMPBA" | Group == "ZMPIL" | Group == "ZMPJA")
+maize_genotypes <- maize_genotypes[,-c(1,2,3)]
+maize_genotypes <- t (maize_genotypes)
+teosinte_genotypes <- teosinte_genotypes[,-c(1,2,3)]
+teosinte_genotypes <- t (teosinte_genotypes)
+position <- position[,-c(2,5:15)]
+arrange(position, SNP_ID)
+maize_genotypes <- cbind(position, maize_genotypes)
+teosinte_genotypes <- cbind(position, teosinte_genotypes)
+
+# Data processing
+maize_ded <- data.frame(lapply(maize_genotypes, as.character), stringsAsFactors=FALSE)
+
+maize_ded <- data.frame(sapply( maize_ded,function(x) { x <- gsub("?","-",x,fixed=TRUE)} ))
+
+teosinte_ded <- data.frame(lapply(teosinte_genotypes, as.character), stringsAsFactors=FALSE)
+
+teosinte_ded <- data.frame(sapply(teosinte_ded,function(x){ x <- gsub("?","-",x,fixed=TRUE) } ))
+
+for (i in 1:10) { maize <- filter(maize_genotypes, "Chromosome" == i)
+  maize <- arrange(maize, Position) 
+  outpath <- "C:/Users/giang nguyen/Desktop/R-Assignment/" 
+  name <- sapply(names(maize),function(x){paste("maize_in", i, ".csv", sep='')})
+  out_filePath <- sapply(name, function(x){paste(outpath, x, sep='/')})
+  write.csv(maize, file=out_filePath[i])} #10 of maize increase data
+  
+for (i in 1:10) {teosinte <- filter(teosinte_genotypes, "Chromosome" == i)
+  teosinte <- arrange(teosinte, Position)
+  outpath <- "C:/Users/giang nguyen/Desktop/R-Assignment/"
+  name <- sapply( names(teosinte),function(x){paste("teosinte_in", i, ".csv", sep='')})
+  out_filePath <- sapply( name, function(x){paste(outpath, x, sep='/')})
+   write.csv(teosinte, file=out_filePath[i])} #10 of teosinte increase data
+   
+for (i in 1:10) {maize <- filter(maize_ded, "Chromosome" == i)
+  maize <- arrange(maize, desc(Position))
+  outpath <- "C:/Users/giang nguyen/Desktop/R-Assignment/"
+  name <- sapply( names(maize),function(x){paste("maize_de", i, ".csv", sep='')})
+  out_filePath <- sapply( name, function(x){paste(outpath, x, sep='/')})
+   write.csv(maize, file=out_filePath[i])}
+
+
+for (i in 1:10) {teosinte <- filter(teosinte_ded, "Chromosome" == i)
+  teosinte  <- arrange(teosinte, desc(Position))
+  outpath <- "C:/Users/giang nguyen/Desktop/R-Assignment/"
+  name <- sapply( names(teosinte),function(x){paste("teosinte_de", i, ".csv", sep='')})
+  out_filePath <- sapply( name, function(x){paste(outpath, x, sep='/')})
+   write.csv(teosinte, file=out_filePath[i])}
+ 
+### Plotting
+#### SNPs per chromosome
+for (i in 1:2){if(i==1){
+    pp=ggplot(data = maize_genotypes) + 
+      geom_bar(mapping = aes(x = Chromosome))
+    print(pp)
+    ggsave(pp,filename = "maize_p.pdf",width = 3,height = 3)
+    dev.off()
+    getwd()
+          }else{
+            pp=ggplot(data = teosinte_genotypes) + 
+             geom_bar(mapping = aes(x = Chromosome))
+            print(pp)
+            ggsave(pp,filename = "teosinte_p.pdf",width = 3,height = 3)
+            dev.off() }  }
+    rm(i)
+    rm(pp)
+
+ for (i in 1:2){
+   maize_genotypes$Position <- as.numeric(maize_genotypes$Position)
+   teosinte_genotypes$Position <- as.numeric(teosinte_genotypes$Position)
+  if(i==1){
+        pp=ggplot(data = maize_genotypes, mapping=aes(x=Chromosome, y=Position))+
+            geom_point(alpha=0.1)
+        print(pp)
+       ggsave(pp,filename = "maize_distribution.pdf",width = 3,height = 3)
+        dev.off()
+        getwd()
+        }else{
+        pp=ggplot(data = teosinte_genotypes, mapping=aes(x=Chromosome, y=Position))+
+             geom_point(alpha=0.1)
+         print(pp)
+         ggsave(pp,filename = "teosinte_distribution.pdf",width = 3,height = 3)
+         dev.off()}  }
+         
+##Missing data and amount of heterozygosity
+
+for(i in 1:2){
+  if(i==1){
+    maize_melt <-melt(maize_genotypes,id.vars=c("SNP_ID","Chromosome", "Position"),variable.name = "Sample", value.name="Nucleotide")
+    rm(maize_genotypes)
+nu <- data.frame(lapply(maize_melt, as.character), stringsAsFactors=FALSE)
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("A","1",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("C","2",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("G","3",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("T","4",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("?","0",x,fixed=TRUE)}))
+nu$Nucleotide <- c(nu$Nucleotide)
+maize_melt <- mutate(maize_melt, allele = case_when(nu$Nucleotide==2~ "homozygous",
+                                                    nu$Nucleotide==11~ "homozygous",
+                                                    nu$Nucleotide==9~ "homozygous",
+                                                    nu$Nucleotide==6~ "homozygous",
+                                                    nu$Nucleotide==1~ "miss",
+                                                    nu$Nucleotide!=(1|2|11|9|6)~ "heterozygous")
+                    )
+           }else{ 
+teosinte_melt<-melt(teosinte_genotypes,id.vars=c("SNP_ID","Chromosome", "Position"),variable.name = "Sample", value.name="Nucleotide")
+rm(teosinte_genotypes)
+nu <- data.frame(lapply(teosinte_melt, as.character), stringsAsFactors=FALSE)
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("A","1",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("C","2",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("G","3",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("T","4",x,fixed=TRUE)}))
+nu <- data.frame(lapply(nu,function(x) {x <- gsub("?","0",x,fixed=TRUE)}))
+nu$Nucleotide <- c(nu$Nucleotide)
+teosinte_melt <- mutate(teosinte_melt, allele = case_when(nu$Nucleotide==2~ "homozygous",
+                                                          nu$Nucleotide==11~ "homozygous",
+                                                          nu$Nucleotide==9~ "homozygous",
+                                                          nu$Nucleotide==6~ "homozygous",
+                                                          nu$Nucleotide==1~ "miss",
+                                                          nu$Nucleotide!=(1|2|11|9|6)~ "heterozygous")
+                        )
+           }
+               }
+rm(nu)
+rm(i)
+
+#proportion of homozygous and heterozygous sites as well as missing data in each sample
+for (i in 1:2){
+  if(i==1){
+pp=ggplot(data = maize_melt) + 
+  geom_bar(mapping = aes(x =Sample, fill=allele))
+print(pp)
+ggsave(pp,filename = "maize_proportion.pdf",width = 5,height = 3)
+dev.off()
+          }else{
+            pp=ggplot(data = teosinte_melt) + 
+            geom_bar(mapping = aes(x =Sample, fill=allele))
+            print(pp)
+            ggsave(pp,filename = "teosinte_proportion.pdf",width = 5,height = 3)
+            dev.off()
+          }
+                }
+
+  
+#proportion of homozygous and heterozygous sites as well as missing data in each Chromosome group
+ for (i in 1:2){
+  if(i==1){
+pp=ggplot(data = maize_melt) + 
+  geom_bar(mapping = aes(x =Chromosome, fill=allele), position = 'fill') #Normalize the height of individual bars
+  print(pp)
+ggsave(pp,filename = "maize_gro_proportion.pdf",width = 9,height = 4)
+dev.off()
+          }else{
+            pp=ggplot(data = teosinte_melt) + 
+            geom_bar(mapping = aes(x =Chromosome, fill=allele), position = 'fill')#Normalize the height of individual bars
+            print(pp)
+            ggsave(pp,filename = "teosinte_gro_proportion.pdf",width = 9,height = 4)
+            dev.off()
+          }
+                }
+```{r}

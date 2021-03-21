@@ -1,0 +1,28 @@
+---
+title: "Zdyrski_review"
+author: "Christopher_Zdyrski"
+date: "3/21/2021"
+output: html_document
+---
+
+
+I believe you have to put your chunks of code in " ``` " the 3 single asterisks for the program to allow you to run it in a markdown format. Right now it is treating it as text. Treat it like the chunk below for all of your commands.
+
+```{r}
+str(genotypes) # displays the internal structure of a given R object
+nrow(genotypes) # return the number of rows 
+ncol(genotypes) # return the numberof columns
+dim(genotypes) # Dimensions of an Object
+str(position)
+nrow(position)
+ncol(position)
+dim(position)
+```
+
+When someone else goes to run the files it says genotypes and position are not to be found. You have to either have it download the file or something else so that I or anyone can run it, right now they don't exist so I wouldn't be able to run any of your files.
+
+You also did not load any librarys at the beginning. I am getting a can not find "Group" error, and a can not find "arrange " error. You have to load things such as ggplot for any of this to properly run correctly on a different machine. Do install packages and load library section.
+
+I think you will have a problem with the outpath section as well, since if I run it my folder location is different then yours.
+
+I could not run any of your ggplot without fixing everything stated above, but it looks like you should be able to create the needed plots.

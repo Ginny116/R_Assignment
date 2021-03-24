@@ -10,16 +10,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## R Markdown
+genotypes <- read_tsv ("C:/Users/giang nguyen/Desktop/R_Assignmnet (Review)/fang_et_al_genotypes.txt")
+position <- read_tsv ("C:/Users/giang nguyen/Desktop/R_Assignmnet (Review)/snp_position.txt")
 
-#Data Inspection
+# Data Inspection
 str(genotypes) # displays the internal structure of a given R object
-nrow(genotypes) # return the number of rows 
-ncol(genotypes) # return the numberof columns
-dim(genotypes) # Dimensions of an Object
+nrow(genotypes) # return the number of rows _ [1] 2782 
+ncol(genotypes) # return the numberof columns _ [1] 986 
+dim(genotypes) # Dimensions of an Object _ [1] 2782  986
 str(position)
-nrow(position)
-ncol(position)
-dim(position)
+nrow(position) [1] 983
+ncol(position) [1] 15
+dim(position) [1] 983  15
 
 # Manipulate data
 maize_genotypes <- filter(genotypes, Group == "ZMMLR" | Group == "ZMMIL" | Group == "ZMMMR") 
@@ -77,14 +79,14 @@ for (i in 1:2){if(i==1){
     pp=ggplot(data = maize_genotypes) + 
       geom_bar(mapping = aes(x = Chromosome))
     print(pp)
-    ggsave(pp,filename = "maize_p.pdf",width = 3,height = 3)
+    ggsave(pp,filename = "maize_plot.pdf",width = 5,height = 8)
     dev.off()
     getwd()
           }else{
             pp=ggplot(data = teosinte_genotypes) + 
              geom_bar(mapping = aes(x = Chromosome))
             print(pp)
-            ggsave(pp,filename = "teosinte_p.pdf",width = 3,height = 3)
+            ggsave(pp,filename = "teosinte_plot.pdf",width = 5,height = 8)
             dev.off() }  }
     rm(i)
     rm(pp)
@@ -106,7 +108,10 @@ for (i in 1:2){if(i==1){
          ggsave(pp,filename = "teosinte_distribution.pdf",width = 3,height = 3)
          dev.off()}  }
          
-##Missing data and amount of heterozygosity
+## Missing data and amount of heterozygosity
+
+install.packages("reshape")
+library(reshape)
 
 for(i in 1:2){
   if(i==1){
@@ -148,7 +153,7 @@ teosinte_melt <- mutate(teosinte_melt, allele = case_when(nu$Nucleotide==2~ "hom
 rm(nu)
 rm(i)
 
-#proportion of homozygous and heterozygous sites as well as missing data in each sample
+# Proportion of homozygous and heterozygous sites as well as missing data in each sample
 for (i in 1:2){
   if(i==1){
 pp=ggplot(data = maize_melt) + 
@@ -166,7 +171,7 @@ dev.off()
                 }
 
   
-#proportion of homozygous and heterozygous sites as well as missing data in each Chromosome group
+# Proportion of homozygous and heterozygous sites as well as missing data in each Chromosome group
  for (i in 1:2){
   if(i==1){
 pp=ggplot(data = maize_melt) + 
@@ -179,6 +184,23 @@ dev.off()
             geom_bar(mapping = aes(x =Chromosome, fill=allele), position = 'fill')#Normalize the height of individual bars
             print(pp)
             ggsave(pp,filename = "teosinte_gro_proportion.pdf",width = 9,height = 4)
+            dev.off()
+          }
+                }
+# My own visualization
+for (i in 1:2){
+  if(i==1){
+pp=ggplot(data = maize_melt) + 
+  geom_bar(mapping = aes(x =allele))
+print(pp)
+ggsave(pp,filename = "maize_allele.pdf",width = 3,height = 3)
+dev.off()
+getwd()
+          }else{
+            pp=ggplot(data = teosinte_melt) + 
+            geom_bar(mapping = aes(x =allele))
+            print(pp)
+            ggsave(pp,filename = "teosinte_allele.pdf",width = 3,height = 3)
             dev.off()
           }
                 }
